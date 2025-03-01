@@ -14,7 +14,7 @@ logging.basicConfig(
 
 # Initialize Flask app and SocketIO
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode="gevent")
+socketio = SocketIO(app, async_mode="gevent", logger=True, engineio_logger=True)
 
 # Serve the webpage
 
@@ -30,10 +30,6 @@ def __init__():
 
     logging.info("1 thread started")
 
-    socketio.on_event("connect", onconnect)
-    socketio.on_event("disconnect", ondisconnect)
-    socketio.on_event("screenshot_response", handlescreenproxy)
-
 
     load_dotenv(verbose = True)
 
@@ -41,10 +37,13 @@ def __init__():
     if os.getenv("ENV") == "dev":
         socketio.run(app, debug = True) # Reserved for local dev
 
+@socketio.on("screenshot_response")
 def screenshot_response_ev(_, data):
     logging.info(f"Proxy screenshot event" )
     socketio.emit("screenshot_response", data)
-
+@socketio.on_error_default
+def socketerror(e):
+    logging.error(f"Proxy socket error: {e}")
 
     
 @app.route("/")
@@ -61,7 +60,7 @@ def handlescreenproxy(data):
 def connectionidentification():
     ...
 
-
+@socketio.on("connect")
 def onconnect(authentication):
     global n_clients, providers
     logging.info("New client connected")
@@ -87,7 +86,7 @@ def onconnect(authentication):
     
     
 
-
+@socketio.on("disconnect")
 def ondisconnect():
     global providers, n_clients
     logging.info("Client disonnected")

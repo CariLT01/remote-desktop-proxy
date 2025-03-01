@@ -1,11 +1,10 @@
-import eventlet
-eventlet.monkey_patch()
+import gevent
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, send, join_room, leave_room, rooms
 
 # Initialize Flask app and SocketIO
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode="eventlet")
+socketio = SocketIO(app, async_mode="gevent")
 
 # Serve the webpage
 

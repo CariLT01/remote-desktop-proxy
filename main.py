@@ -38,7 +38,7 @@ def __init__():
         socketio.run(app, debug = True) # Reserved for local dev
 
 @socketio.on("screenshot_response")
-def screenshot_response_ev(_, data):
+def screenshot_response_ev(data):
     logging.info(f"Proxy screenshot event" )
     socketio.emit("screenshot_response", data)
 @socketio.on_error_default

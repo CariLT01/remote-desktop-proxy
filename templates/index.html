@@ -53,6 +53,20 @@
             socket.on("connect_error", (err) => {
                 alert("Failed to connect to socket. Please ensure you are logged in");
             });
+            socket.on("provider_count", function(msg) {
+                if (msg && msg.hasOwnProperty('count')) {
+                    if (msg.count <= 0) {
+                        alert("There are currently no screen providers at the moment.");
+                    }
+                
+                } else {
+                    console.log(msg);
+                    console.error("No .count in msg");
+                }
+            })
+            socket.on("provider_disconnect", function(msg) {
+                alert("The screen provider has disconnected.");
+            })
         });
     </script>
 </head>

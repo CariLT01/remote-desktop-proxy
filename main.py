@@ -4,7 +4,7 @@ monkey.patch_all()
 from dotenv import load_dotenv
 import os, logging, bcrypt, json, jwt, datetime
 from flask import Flask, render_template, request, jsonify
-from flask_socketio import SocketIO, join_room, rooms, ConnectionRefusedError
+from flask_socketio import SocketIO, join_room, rooms, ConnectionRefusedError, emit
 
 logging.basicConfig(
     level=logging.DEBUG,  # Set the log level to DEBUG (can be INFO, WARNING, ERROR, CRITICAL)
@@ -93,6 +93,8 @@ def onconnect(authentication):
                 raise ConnectionRefusedError("Dist client. Invalid or expired token.")
             logging.info("New client connected without error.")
             n_clients += 1
+
+            emit("provider_count", {"count": len(providers)})
         else:
             raise ConnectionRefusedError("No dist provided. Please add key 'dist' to authentication data.")
 
@@ -180,6 +182,7 @@ def ondisconnect(_):
     if providers.get(request.sid) != None:
         logging.info("Disconnected client is a provider")
         providers[request.sid] = None
+        socketio.emit("provider_disconnect", {})
         return
     n_clients -= 1
 

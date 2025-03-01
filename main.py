@@ -30,7 +30,7 @@ def __init__():
 
     #app.add_url_rule("/", view_func=self.index)
 
-    socketio.run(app)
+    # socketio.run(app) # Reserved for local dev
 
 def screenshot_response_ev(_, data):
     print(f"Proxy screenshot event" )

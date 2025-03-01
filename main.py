@@ -181,7 +181,7 @@ def ondisconnect(_):
     logging.info("Client disonnected")
     if providers.get(request.sid) != None:
         logging.info("Disconnected client is a provider")
-        providers[request.sid] = None
+        del providers[request.sid]
         socketio.emit("provider_disconnect", {})
         return
     n_clients -= 1

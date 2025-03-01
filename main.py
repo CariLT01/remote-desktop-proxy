@@ -1,5 +1,8 @@
 from gevent import monkey
+
 monkey.patch_all()
+from dotenv import load_dotenv
+import os
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, send, join_room, leave_room, rooms
 
@@ -26,11 +29,11 @@ def __init__():
     socketio.on_event("screenshot_response", handlescreenproxy)
 
 
-
+    load_dotenv(verbose = True)
 
     #app.add_url_rule("/", view_func=self.index)
-
-    # socketio.run(app) # Reserved for local dev
+    if os.getenv("ENV") == "dev":
+        socketio.run(app, debug = True) # Reserved for local dev
 
 def screenshot_response_ev(_, data):
     print(f"Proxy screenshot event" )

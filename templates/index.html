@@ -5,6 +5,7 @@
     <title>Screenshot Viewer</title>
     <!-- Load Socket.IO from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
             // Connect to the WebSocket server
@@ -16,7 +17,12 @@
                 console.log("The domain does not contain 127.0.0.1");
                 rq = "wss://"
             }
-            var socket = io.connect(rq + document.domain + ':' + location.port);
+            var socket = io.connect(rq + document.domain + ':' + location.port, {
+                auth: {
+                    token: localStorage.getItem("token"),
+                    dist: "client"
+                }
+            });
 
             socket.on('connect', function() {
                 console.log('Connected to WebSocket');
@@ -43,6 +49,9 @@
                     // Display error if something went wrong
                     alert('Error: ' + msg.error);
                 }
+            });
+            socket.on("connect_error", (err) => {
+                alert("Failed to connect to socket. Please ensure you are logged in");
             });
         });
     </script>

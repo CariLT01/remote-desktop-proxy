@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Screenshot Viewer</title>
+    <!-- Load Socket.IO from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Connect to the WebSocket server
+            var socket = io.connect('https://' + document.domain + ':' + location.port);
+
+            socket.on('connect', function() {
+                console.log('Connected to WebSocket');
+            });
+
+            // Request screenshot when button is clicked
+            document.getElementById('requestButton').addEventListener('click', function() {
+                socket.emit('request_screenshot');
+            });
+
+            // Handle screenshot response
+            socket.on('screenshot_response', function(msg) {
+                console.log("Received image")
+
+
+
+                var img = document.getElementById('screenshot');
+                if (msg.data) {
+                    // Set image source to display the screenshot
+                    const blob = new Blob([msg.data], { type: 'image/jpeg' });
+
+                    img.src = URL.createObjectURL(blob);
+                } else if (msg.error) {
+                    // Display error if something went wrong
+                    alert('Error: ' + msg.error);
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Screenshot Viewer</h1>
+    <button id="requestButton">Request Screenshot</button>
+    <br><br>
+    <img id="screenshot" src="" alt="Screenshot" style="max-width: 100%;">
+</body>
+</html>

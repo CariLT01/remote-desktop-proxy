@@ -8,13 +8,13 @@
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', function() {
             // Connect to the WebSocket server
-            let rq = "http"
+            let rq = "ws"
             if (window.location.hostname.includes("127.0.0.1")) {
                 console.log("The domain contains 127.0.0.1");
-                rq = "http"
+                rq = "ws"
             } else {
                 console.log("The domain does not contain 127.0.0.1");
-                rq = "https"
+                rq = "wss"
             }
             var socket = io.connect(rq + document.domain + ':' + location.port);
 

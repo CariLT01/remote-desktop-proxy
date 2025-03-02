@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #212529;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #007bff;
+            margin: 0;
+        }
+
+        .create-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .token-list {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .token-item {
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .token-item:last-child {
+            border-bottom: none;
+        }
+
+        .token-info {
+            flex-grow: 1;
+            margin-right: 20px;
+        }
+
+        .token-id {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .token-name {
+            color: #495057;
+            margin: 5px 0;
+        }
+
+        .token-value {
+            display: none;
+            font-family: monospace;
+            color: #28a745;
+        }
+
+        .show-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .show-button:hover, .create-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Token Management</h1>
+            <button class="create-button" onclick="createNewToken()">Create New Token</button>
+        </div>
+        
+        <div class="token-list">
+            <!-- Updated Token Items with valid IDs -->
+            <!--<div class="token-item" id="token-1">
+                <div class="token-info">
+                    <div class="token-id">ID: 001</div>
+                    <div class="token-name">API Access Token</div>
+                    <span class="token-value">sk_1234abcd5678efgh</span>
+                </div>
+                <button class="show-button" onclick="toggleToken('1')">Show</button>
+            </div>
+
+            <div class="token-item" id="token-2">
+                <div class="token-info">
+                    <div class="token-id">ID: 002</div>
+                    <div class="token-name">User Auth Token</div>
+                    <span class="token-value">tk_9876zyxw5432vuts</span>
+                </div>
+                <button class="show-button" onclick="toggleToken('2')">Show</button>
+            </div>-->
+        </div>
+    </div>
+
+    <script>
+        const parser = new DOMParser();
+        const tokenElement = `
+        <div class="token-item" id="token-1">
+            <div class="token-info">
+                <div class="token-id">ID: 001</div>
+                <div class="token-name">API Access Token</div>
+                <span class="token-value">sk_1234abcd5678efgh</span>
+            </div>
+            <button class="show-button" onclick="toggleToken('1')">Show</button>
+        </div>
+        `;
+        const tokenListElement = document.querySelector(".token-list");
+
+        function createNewTokenElement(token_name, token_id) {
+            const doc = parser.parseFromString(tokenElement, "text/html");
+            const element = doc.body.firstChild;
+            element.id = "token-" + token_id.toString();
+            const tokenIdElement = element.querySelector(".token-id");
+            tokenIdElement.textContent = "Token #" + token_id.toString();
+            const tokenNameElement = element.querySelector(".token-name");
+            tokenNameElement.textContent = token_name.toString();
+            const showTokenValueButtonElement = element.querySelector(".show-button");
+            showTokenValueButtonElement.onclick = function() {
+                toggleToken(token_id.toString());
+            };
+            console.log("Created new token element for ID: ", token_id);
+            tokenListElement.appendChild(element);
+        }
+
+        function toggleToken(tokenId) {
+            getTokenValueByID(Number(tokenId));
+            // Use CSS.escape to handle numeric IDs
+            const selector = `#token-${CSS.escape(tokenId)} .token-value`;
+            const tokenValue = document.querySelector(selector);
+            const button = document.querySelector(`#token-${CSS.escape(tokenId)} .show-button`);
+            
+            if (tokenValue.style.display === 'none' || !tokenValue.style.display) {
+                tokenValue.style.display = 'inline';
+                button.textContent = 'Hide';
+            } else {
+                tokenValue.style.display = 'none';
+                button.textContent = 'Show';
+            }
+        }
+        function getTokenValueByID(token_id) {
+            if (localStorage.getItem("token") == null) {
+                alert("Error: not logged in");
+                return;
+            }
+            fetch("/admin/get_token_value", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("token").toString()
+                },
+                body: JSON.stringify({
+                    id: token_id
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log("Successfully fetched token")
+
+                    const tokenElement = document.querySelector("#token-" + token_id.toString());
+                    const tokenValueElement = tokenElement.querySelector(".token-value");
+                    tokenValueElement.textContent = data.token;
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Error: ", error);
+                alert(error.message || 'Token fetch failed');
+            })
+        }
+        function fetchTokens() {
+            if (localStorage.getItem("token") == null) {
+                alert("Error: not logged in");
+                return;
+            }
+            fetch("/admin/get_provider_tokens", {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem("token").toString()
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw err; });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log("Successfully got tokens response")
+
+                    const users = data.users;
+                    tokenListElement.innerHTML = "";
+                    Object.keys(users).forEach(key => {
+                        const value = users[key];
+
+                        const token_id = key;
+                        const token_name = value.name;
+                        
+                        
+                        createNewTokenElement(token_name.toString(), token_id.toString());
+                    });
+                } else {
+                    alert(data.message)
+                }
+            })
+            .catch(error => {
+                console.error("Error: ", error);
+                alert(error.message || 'Failed to get tokens.');
+            })
+        }
+
+        function createNewToken() {
+            // Create new token logic remains the same
+            window.location.href = "/admin/providers/create_token"
+        }
+
+        fetchTokens()
+    </script>
+</body>
+</html>

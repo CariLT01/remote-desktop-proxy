@@ -31,7 +31,7 @@ if os.getenv("ENV") == "dev":
     logger = False
     engineio_logger = False
 app = Flask(__name__)
-socketio = SocketIO(app, async_mode="gevent", cors_allowed_origins=allowed_cors, logger=logger, engineio_logger=engineio_logger)
+socketio = SocketIO(app, async_mode="gevent", cors_allowed_origins=allowed_cors, logger=logger, engineio_logger=False)
 
 
 
